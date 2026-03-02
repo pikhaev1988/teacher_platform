@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Главная - Платформа для учителей{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <div class="row min-vh-80 align-items-center">
+        <div class="col-lg-6 text-white">
+            <h1 class="display-4 fw-bold mb-4">
+                Создавайте поурочные планы за секунды
+            </h1>
+            <p class="lead mb-4">
+                Наша платформа использует искусственный интеллект для создания
+                готовых поурочных планов и презентаций строго по стандартам ФГОС.
+            </p>
+            {% if not user.is_authenticated %}
+                <a href="{% url 'users:register' %}" class="btn btn-primary btn-lg me-2">
+                    Начать бесплатно
+                </a>
+                <a href="{% url 'users:login' %}" class="btn btn-outline-light btn-lg">
+                    Войти
+                </a>
+            {% else %}
+                <a href="{% url 'generator:create' %}" class="btn btn-primary btn-lg">
+                    Создать первый план
+                </a>
+            {% endif %}
+        </div>
+        <div class="col-lg-6">
+            <img src="https://via.placeholder.com/600x400" alt="Hero" class="img-fluid rounded-3 shadow">
+        </div>
+    </div>
+
+    <!-- Преимущества -->
+    <div class="row mt-5 pt-5">
+        <div class="col-12 text-center text-white mb-5">
+            <h2 class="display-6 fw-bold">Почему выбирают нас</h2>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="display-1 text-primary mb-3">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h4 class="card-title">Мгновенная генерация</h4>
+                    <p class="card-text">
+                        Получите готовый план урока за 30 секунд. Просто введите тему и класс.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="display-1 text-primary mb-3">
+                        <i class="fas fa-file-word"></i>
+                    </div>
+                    <h4 class="card-title">Готовые форматы</h4>
+                    <p class="card-text">
+                        План в Word и презентация в PowerPoint автоматически. Скачивайте и используйте.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="display-1 text-primary mb-3">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h4 class="card-title">Соответствие ФГОС</h4>
+                    <p class="card-text">
+                        Все планы создаются с учетом последних требований Федерального стандарта.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Тарифы -->
+    <div class="row mt-5 pt-5">
+        <div class="col-12 text-center text-white mb-5">
+            <h2 class="display-6 fw-bold">Доступные тарифы</h2>
+        </div>
+
+        <div class="col-md-6 mx-auto">
+            <div class="card">
+                <div class="card-body text-center p-5">
+                    <h3 class="card-title">Подписка на месяц</h3>
+                    <div class="display-3 fw-bold text-primary my-4">200 ₽</div>
+                    <ul class="list-unstyled mb-4">
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Неограниченное количество планов</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Word и PowerPoint форматы</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>История всех генераций</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Поддержка 24/7</li>
+                    </ul>
+                    {% if user.is_authenticated %}
+                        <form method="post" action="{% url 'payments:create_payment' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="payment_type" value="subscription">
+                            <input type="hidden" name="amount" value="200">
+                            <button type="submit" class="btn btn-primary btn-lg w-100">
+                                Оформить подписку
+                            </button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'users:register' %}" class="btn btn-primary btn-lg w-100">
+                            Зарегистрироваться
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

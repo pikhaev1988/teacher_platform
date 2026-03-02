@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %}Личный кабинет{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Приветствие -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-2">Добро пожаловать, {{ user.first_name }}!</h2>
+                            <p class="mb-0">Рады видеть вас снова</p>
+                        </div>
+                        <div class="text-end">
+                            <h4 class="mb-2">{{ user.balance }} ₽</h4>
+                            <p class="mb-0">Баланс</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Статус подписки -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-crown text-warning me-2"></i>
+                        Статус подписки
+                    </h5>
+                    {% if user.subscription_active and user.subscription_end_date > now %}
+                        <p class="text-success mb-2">
+                            <i class="fas fa-check-circle me-1"></i>
+                            Активна до {{ user.subscription_end_date|date:"d.m.Y" }}
+                        </p>
+                        <a href="{% url 'generator:create' %}" class="btn btn-primary">
+                            Создать новый план
+                        </a>
+                    {% else %}
+                        <p class="text-danger mb-3">Подписка не активна</p>
+                        <a href="{% url 'payments:tariffs' %}" class="btn btn-primary">
+                            Оформить подписку за 200 ₽
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Статистика
+                    </h5>
+                    <div class="row">
+                        <div class="col-6">
+                            <p class="text-muted mb-1">Всего генераций</p>
+                            <h3>{{ user.total_generations }}</h3>
+                        </div>
+                        <div class="col-6">
+                            <p class="text-muted mb-1">Доступно</p>
+                            <h3>{{ user.balance }} ₽</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Последние генерации -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0">Последние генерации</h5>
+                </div>
+                <div class="card-body">
+                    {% if generations %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Дата</th>
+                                        <th>Тема</th>
+                                        <th>Класс</th>
+                                        <th>Предмет</th>
+                                        <th>Статус</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for gen in generations %}
+                                        <tr>
+                                            <td>{{ gen.created_at|date:"d.m.Y H:i" }}</td>
+                                            <td>{{ gen.topic|truncatechars:50 }}</td>
+                                            <td>{{ gen.grade }}</td>
+                                            <td>{{ gen.subject }}</td>
+                                            <td>
+                                                {% if gen.status == 'completed' %}
+                                                    <span class="badge bg-success">Готово</span>
+                                                {% elif gen.status == 'processing' %}
+                                                    <span class="badge bg-info">Генерируется</span>
+                                                {% elif gen.status == 'pending' %}
+                                                    <span class="badge bg-warning">В очереди</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">Ошибка</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if gen.status == 'completed' %}
+                                                    <a href="{% url 'generator:download_docx' gen.id %}" class="btn btn-sm btn-outline-primary me-1" title="Скачать Word">
+                                                        <i class="fas fa-file-word"></i>
+                                                    </a>
+                                                    <a href="{% url 'generator:download_pptx' gen.id %}" class="btn btn-sm btn-outline-success" title="Скачать PowerPoint">
+                                                        <i class="fas fa-file-powerpoint"></i>
+                                                    </a>
+                                                {% elif gen.status == 'processing' or gen.status == 'pending' %}
+                                                    <a href="{% url 'generator:request_status' gen.id %}" class="btn btn-sm btn-info">
+                                                        <i class="fas fa-spinner fa-spin"></i>
+                                                    </a>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="text-center mt-3">
+                            <a href="{% url 'generator:history' %}" class="btn btn-outline-primary">
+                                Смотреть всю историю
+                            </a>
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center mb-0">У вас пока нет генераций</p>
+                        <div class="text-center mt-3">
+                            <a href="{% url 'generator:create' %}" class="btn btn-primary">
+                                Создать первый план
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

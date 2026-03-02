@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+
+{% block title %}Тарифы и оплата{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-5">
+        <div class="col-12 text-center text-white">
+            <h1 class="display-4 fw-bold">Тарифы и оплата</h1>
+            <p class="lead">Выберите удобный способ использования платформы</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Подписка -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center p-5">
+                    <div class="mb-4">
+                        <i class="fas fa-crown text-warning" style="font-size: 3rem;"></i>
+                    </div>
+
+                    <h3 class="card-title">Подписка на месяц</h3>
+                    <div class="display-3 fw-bold text-primary my-4">{{ subscription_price }} ₽</div>
+
+                    <ul class="list-unstyled mb-4">
+                        <li class="mb-3">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <strong>Неограниченное</strong> количество планов
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Все предметы и классы
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Word и PowerPoint форматы
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Приоритетная генерация
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-check text-success me-2"></i>
+                            История всех генераций
+                        </li>
+                    </ul>
+
+                    <form method="post" action="{% url 'payments:create_payment' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="payment_type" value="subscription">
+                        <input type="hidden" name="amount" value="{{ subscription_price }}">
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            Оформить подписку
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Пополнение баланса -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center p-5">
+                    <div class="mb-4">
+                        <i class="fas fa-wallet text-success" style="font-size: 3rem;"></i>
+                    </div>
+
+                    <h3 class="card-title">Пополнение баланса</h3>
+                    <p class="text-muted mb-4">Платите только за то, что используете</p>
+
+                    <div class="row g-3 mb-4">
+                        {% for amount in topup_options %}
+                            <div class="col-6">
+                                <div class="card bg-light">
+                                    <div class="card-body py-3">
+                                        <h4 class="mb-0">{{ amount }} ₽</h4>
+                                        <small class="text-muted">{{ amount|add:"-10" }} генераций</small>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <p class="text-muted small mb-4">
+                        <i class="fas fa-info-circle me-1"></i>
+                        1 генерация = 10 ₽
+                    </p>
+
+                    <form method="post" action="{% url 'payments:create_payment' %}" id="topupForm">
+                        {% csrf_token %}
+                        <input type="hidden" name="payment_type" value="topup">
+
+                        <div class="mb-3">
+                            <label for="customAmount" class="form-label">Или укажите свою сумму:</label>
+                            <div class="input-group">
+                                <input type="number" name="amount" class="form-control" id="customAmount"
+                                       min="10" step="10" value="100" required>
+                                <span class="input-group-text">₽</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-success btn-lg w-100">
+                            Пополнить баланс
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Преимущества -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body p-5">
+                    <h3 class="text-center mb-4">Почему это выгодно?</h3>
+
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-3">
+                            <i class="fas fa-clock text-primary fa-2x mb-3"></i>
+                            <h5>Экономия времени</h5>
+                            <p class="text-muted">Создание плана занимает 30 секунд вместо 2 часов</p>
+                        </div>
+
+                        <div class="col-md-4 text-center mb-3">
+                            <i class="fas fa-gem text-primary fa-2x mb-3"></i>
+                            <h5>Качество контента</h5>
+                            <p class="text-muted">Планы соответствуют ФГОС и готовы к использованию</p>
+                        </div>
+
+                        <div class="col-md-4 text-center mb-3">
+                            <i class="fas fa-hand-holding-heart text-primary fa-2x mb-3"></i>
+                            <h5>Гибкая система</h5>
+                            <p class="text-muted">Подписка или оплата за использование - выбирайте сами</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Валидация формы пополнения
+    $('#topupForm').submit(function(e) {
+        var amount = $('#customAmount').val();
+        if (amount < 10) {
+            e.preventDefault();
+            alert('Минимальная сумма пополнения - 10 рублей');
+        }
+    });
+});
+</script>
+{% endblock %}

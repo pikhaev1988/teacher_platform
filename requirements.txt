@@ -1,0 +1,17 @@
+
+psycopg2-binary
+python-decouple
+django-environ
+celery
+redis
+openai
+python-docx
+python-pptx
+boto3
+django-storages
+django-private-storage
+yookassa
+Pillow
+markdown
+django-htmx
+requests

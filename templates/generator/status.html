@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Статус генерации{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body text-center p-5">
+                    <h2 class="mb-4">Статус генерации</h2>
+
+                    <div id="statusContainer">
+                        <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                            <span class="visually-hidden">Загрузка...</span>
+                        </div>
+
+                        <h4 id="statusMessage">Ваш запрос обрабатывается...</h4>
+                        <p id="statusDetail" class="text-muted">Это может занять до 30 секунд</p>
+
+                        <div class="progress mb-4" style="height: 10px;">
+                            <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated"
+                                 style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div id="resultContainer" style="display: none;">
+                        <div class="mb-4">
+                            <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                        </div>
+
+                        <h4 class="text-success mb-3">Готово!</h4>
+                        <p class="mb-4">Ваши материалы успешно сгенерированы</p>
+
+                        <div class="d-flex justify-content-center gap-3">
+                            <a id="downloadDocxBtn" href="#" class="btn btn-primary">
+                                <i class="fas fa-file-word me-2"></i>
+                                Скачать Word
+                            </a>
+                            <a id="downloadPptxBtn" href="#" class="btn btn-success">
+                                <i class="fas fa-file-powerpoint me-2"></i>
+                                Скачать PowerPoint
+                            </a>
+                        </div>
+                    </div>
+
+                    <div id="errorContainer" style="display: none;">
+                        <div class="mb-4">
+                            <i class="fas fa-exclamation-circle text-danger" style="font-size: 4rem;"></i>
+                        </div>
+
+                        <h4 class="text-danger mb-3">Ошибка генерации</h4>
+                        <p id="errorMessage" class="mb-4"></p>
+
+                        <a href="{% url 'generator:create' %}" class="btn btn-primary">
+                            Попробовать снова
+                        </a>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <a href="{% url 'users:dashboard' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Вернуться в кабинет
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    var requestId = {{ request.id }};
+    var checkInterval = setInterval(checkStatus, 2000); // Проверка каждые 2 секунды
+    var progress = 0;
+
+    // Анимация прогресс-бара
+    var progressInterval = setInterval(function() {
+        if (progress < 90) {
+            progress += 5;
+            $('#progressBar').css('width', progress + '%');
+        }
+    }, 1000);
+
+    function checkStatus() {
+        $.get('/generator/status/' + requestId + '/json/', function(data) {
+            if (data.status === 'completed') {
+                clearInterval(checkInterval);
+                clearInterval(progressInterval);
+
+                $('#progressBar').css('width', '100%').removeClass('progress-bar-animated');
+                $('#statusContainer').hide();
+
+                $('#downloadDocxBtn').attr('href', data.docx_url);
+                $('#downloadPptxBtn').attr('href', data.pptx_url);
+                $('#resultContainer').show();
+
+            } else if (data.status === 'failed') {
+                clearInterval(checkInterval);
+                clearInterval(progressInterval);
+
+                $('#statusContainer').hide();
+                $('#errorMessage').text(data.error || 'Произошла неизвестная ошибка');
+                $('#errorContainer').show();
+
+            } else if (data.status === 'processing') {
+                $('#statusMessage').text('Генерация материалов...');
+                $('#statusDetail').text('Создаем план и презентацию');
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
